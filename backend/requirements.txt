@@ -4,3 +4,5 @@ flask_cors
 psycopg2
 mobilitydb-sqlalchemy
 trajectory
+pygeoif
+pytz

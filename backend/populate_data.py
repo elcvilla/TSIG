@@ -8,7 +8,6 @@ from shapely.geometry import Point
 from main import app
 from models import db, Users
 
-
 users_data = defaultdict(list)
 
 with open("go_track_trackspoints.csv") as csvfile:
@@ -21,10 +20,12 @@ with open("go_track_trackspoints.csv") as csvfile:
 
         user_id, lat, lng, time = int(row[3]), float(row[1]), float(row[2]), datetime.datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S')
         users_data[user_id].append({"geometry": Point(lat, lng), "t": time})
+        #print(users_data[user_id])
+
 
 with app.app_context():
-    #db.drop_all()
-    #db.create_all()
+    db.drop_all()
+    db.create_all()
 
     print("Trying to populate {} rows".format(len(users_data)))
 
@@ -33,6 +34,7 @@ with app.app_context():
             print("Trying ....")
             df = pd.DataFrame(users_data[userid]).set_index("t")
             user = Users(userid=userid, userpos=df,)
+#            print(user.userpos)
             db.session.add(user)
             db.session.commit()
         except:

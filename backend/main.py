@@ -31,6 +31,49 @@ def _filter_users_criteria(filters):
         traceback.print_exc()
         return jsonify({"errors": [DATA_UNINITIALIZED_ERROR]}), 400
 
+    # Import the library
+    from czml import czml
+
+    # Initialize a document
+    doc = czml.CZML()
+
+    # Create and append the document packet
+    packet1 = czml.CZMLPacket(id='document',version='1.0')
+    doc.packets.append(packet1)
+
+    # Create and append a POINT packet
+    packet3 = czml.CZMLPacket()
+
+    for user_id, user, distance, speed in users:
+        packet3.id = user_id
+        pp = czml.Point()
+        pp.color = {'rgba': [0, 255, 127, 55]}
+        pp.outlineColor = {'rgba':[255,0,0,128]}
+
+        #varPos = czml.Position(cartographicDegrees=[2020-06-04T16:00:00Z,-56.189652081027,-34.8888227843656,0,2020-06-04T16:05:00Z,-56.189652081027,-34.8888227843656,0])
+        pos = czml.Position()
+        #coords = ['2020-06-04T16:00:00Z','-56.189652081027','-34.8888227843656','0','2020-06-04T16:05:00Z','-56.189652081027','-34.8888227843656','0']
+
+        coords = serialize_trajectory(user)
+        pos.epoch = coords['epoch']
+        pos.cartographicDegrees = coords['cartographicDegrees']
+
+        #varPos.cartographicDegrees = [2020-06-04T16:00:00Z,-56.189652081027,-34.8888227843656,0,2020-06-04T16:05:00Z,-56.189652081027,-34.8888227843656,0]
+
+        #trayectoria = Path(pos,pp)
+        packet3.position = pos
+        packet3.point = pp
+
+        #Path(pos, pp)
+
+        #packet3.path = trayectoria
+        #pp.Position = Position(varPos)
+        doc.packets.append(packet3)
+
+    # Write the CZML document to a file
+    filename = "example.czml"
+    doc.write(filename)
+
     return jsonify({
         "users": [
             {
